@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Synth-Line Virtual",
+  "description": "Autonomous QC, Triage \u0026 Adaptive Procurement Agents (Software-Only Digital Twin)",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

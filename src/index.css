@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom animations */
+  --animate-conveyor: conveyor 6s linear infinite;
+  --animate-pulse-slow: pulse-slow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-mesh: mesh 25s ease infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-float-slow: float-slow 10s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 4s ease-in-out infinite;
+  --animate-laser-sweep: laser-sweep 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-crt-flicker: crt-flicker 0.2s infinite;
+
+  @keyframes conveyor {
+    0% { background-position-x: 0px; }
+    100% { background-position-x: 72px; }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.95; filter: brightness(1); }
+    50% { opacity: 0.7; filter: brightness(1.05); }
+  }
+
+  @keyframes mesh {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(0.5deg); }
+  }
+
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+    50% { transform: translateY(-12px) translateX(6px) rotate(-0.5deg); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { border-color: rgba(255, 255, 255, 0.5); box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); }
+    50% { border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 25px rgba(99, 102, 241, 0.15); }
+  }
+
+  @keyframes laser-sweep {
+    0% { top: 0%; opacity: 0.3; }
+    50% { top: 100%; opacity: 1; }
+    100% { top: 0%; opacity: 0.3; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes crt-flicker {
+    0% { opacity: 0.99; }
+    50% { opacity: 1; }
+    100% { opacity: 0.995; }
+  }
+}
+
+/* Custom Volumetric and Cyber Aesthetic Styles */
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+}
+
+.scanlines {
+  background: linear-gradient(
+    rgba(255, 255, 255, 0) 50%, 
+    rgba(255, 255, 255, 0.15) 50%
+  );
+  background-size: 100% 4px;
+}
+
+/* Glassmorphism Styles (Ultra-Glassmorphism) */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.08);
+  transform: translateY(-1px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Fluid Gradient Blob Keyframes */
+@keyframes blob-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(120px, -140px) scale(1.3); }
+  66% { transform: translate(-100px, 120px) scale(0.8); }
+}
+@keyframes blob-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  40% { transform: translate(-140px, 160px) scale(1.2); }
+  75% { transform: translate(180px, -100px) scale(0.85); }
+}
+@keyframes blob-3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  30% { transform: translate(100px, 180px) scale(0.9); }
+  70% { transform: translate(-160px, -140px) scale(1.25); }
+}
+@keyframes blob-4 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  35% { transform: translate(-180px, -120px) scale(1.35); }
+  70% { transform: translate(140px, 100px) scale(0.8); }
+}
+@keyframes blob-5 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  45% { transform: translate(130px, -130px) scale(0.95); }
+  80% { transform: translate(-110px, 180px) scale(1.2); }
+}
+
+.animate-blob-1 {
+  animation: blob-1 18s ease-in-out infinite;
+}
+.animate-blob-2 {
+  animation: blob-2 22s ease-in-out infinite;
+}
+.animate-blob-3 {
+  animation: blob-3 20s ease-in-out infinite;
+}
+.animate-blob-4 {
+  animation: blob-4 24s ease-in-out infinite;
+}
+.animate-blob-5 {
+  animation: blob-5 21s ease-in-out infinite;
+}
+
+/* Styled scrollbar for light glassmorphism console and logs */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Custom layout scroll behaviors */
+.scroll-container {
+  scrollbar-gutter: stable;
+}
+
+/* Animated glass neon border accents with light shadow glows */
+.neon-border-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.1), inset 0 0 15px rgba(6, 182, 212, 0.05);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.neon-border-emerald {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1), inset 0 0 15px rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.neon-border-rose {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.1), inset 0 0 15px rgba(244, 63, 94, 0.05);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.neon-border-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1), inset 0 0 15px rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.neon-border-indigo {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1), inset 0 0 15px rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.glitch-flash {
+  animation: glitch-flash-anim 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes glitch-flash-anim {
+  0% { transform: scale(1); filter: hue-rotate(0deg) saturate(1); }
+  25% { transform: scale(1.005) skewX(0.5deg); filter: hue-rotate(45deg) saturate(1.2); }
+  50% { transform: scale(0.995) skewX(-0.5deg); filter: hue-rotate(90deg) saturate(1.5); }
+  100% { transform: scale(1); filter: hue-rotate(180deg) saturate(1); }
+}
