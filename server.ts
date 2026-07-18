@@ -120,7 +120,7 @@ async function runAgenticWorkflow(partId: string, partInstanceId: string, grade:
   broadcast({ type: "AGENT_LOG_GENERATED", payload: triageLog });
 
   // Simulate thinking/retrieval delays for realism
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  await new Promise((resolve) => setTimeout(resolve, 200));
 
   // Determine defect outcome
   const outcome = grade === "poor" ? "rejected" : "passed";
@@ -174,7 +174,7 @@ async function runAgenticWorkflow(partId: string, partInstanceId: string, grade:
     );
     broadcast({ type: "AGENT_LOG_GENERATED", payload: alertLog });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     // 2. Procurement Agent: Select supplier based on criticality SLA rules
     // Count prior rejections of this part
@@ -296,8 +296,22 @@ wss.on("connection", (ws: WebSocket) => {
           break;
 
         case "REACHED_SCANNER":
-          const { partId, partInstanceId, grade } = message.payload;
-          await runAgenticWorkflow(partId, partInstanceId, grade);
+          const { partId, partInstanceId, grade: scanGrade } = message.payload;
+          if (isAutoMode || isSelfChecking) {
+            await runAgenticWorkflow(partId, partInstanceId, scanGrade);
+          } else {
+            // Manual Mode: Log that part arrived at scanning station, but do NOT resolve automatically!
+            const manualArrivedPart = PARTS_CATALOG.find((p) => p.part_id === partId);
+            if (manualArrivedPart) {
+              const triageLog = addAgentLog(
+                "Triage Agent",
+                `Part instance ${partInstanceId} (${manualArrivedPart.name}) arrived at scanning station [MANUAL MODE]. Awaiting operator's PASS/DEFECT decision...`,
+                "info",
+                manualArrivedPart.part_id
+              );
+              broadcast({ type: "AGENT_LOG_GENERATED", payload: triageLog });
+            }
+          }
           break;
 
         case "SPAWN_PART_MANUAL":
@@ -343,7 +357,13 @@ wss.on("connection", (ws: WebSocket) => {
               };
             } else {
               const suppliers = SUPPLIERS_DB[manualPart.part_id] || [];
-              const chosen = suppliers[0]; // pick first default
+              const chosen = suppliers[0] || {
+                supplier_id: "S0-DEFAULT",
+                name: "Default Sourcing",
+                website: "https://example.com",
+                cost: 100,
+                delivery_days: 7,
+              };
               ledgerEntry = {
                 id: rInstanceId,
                 part_id: manualPart.part_id,

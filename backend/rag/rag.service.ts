@@ -219,7 +219,14 @@ export class RAGService {
     // If Gemini client is ready, let's use semantic vector matching!
     if (this.ai) {
       try {
-        const queryVector = await this.getEmbedding(query);
+        // Wrap API call in a 350ms timeout to avoid blocking the conveyor pipeline if API is slow
+        const queryVector = await Promise.race([
+          this.getEmbedding(query),
+          new Promise<number[]>((_, reject) =>
+            setTimeout(() => reject(new Error("Embedding call timed out")), 350)
+          )
+        ]);
+
         const scoredDocs = this.documents
           .map(doc => {
             if (doc.embedding) {
@@ -232,7 +239,7 @@ export class RAGService {
 
         return scoredDocs.slice(0, limit).map(sd => sd.doc);
       } catch (err) {
-        console.warn("[RAG] Vector retrieval failed, falling back to keyword search:", err);
+        console.warn("[RAG] Vector retrieval failed or timed out, falling back to keyword search:", err);
       }
     }
 
