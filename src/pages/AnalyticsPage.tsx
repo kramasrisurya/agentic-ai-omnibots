@@ -59,7 +59,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="bg-white/95 border border-white/90 p-3.5 rounded-2xl shadow-xl font-mono text-xs text-indigo-950">
         {label && <p className="text-slate-500 font-bold mb-1.5">{label}</p>}
         {payload.map((pld: any, index: number) => (
-          <p key={index} className="font-bold text-[11px] flex items-center gap-1.5 mt-1" style={{ color: pld.color || pld.fill }}>
+          <p key={`tooltip-${pld.name}-${index}`} className="font-bold text-[11px] flex items-center gap-1.5 mt-1" style={{ color: pld.color || pld.fill }}>
             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: pld.color || pld.fill }} />
             {pld.name}: {typeof pld.value === 'number' ? pld.value.toLocaleString() : pld.value}
           </p>
@@ -388,7 +388,7 @@ export default function AnalyticsPage({ stats, ledger }: { stats: InventoryStats
           {/* Color Indicators Legend */}
           <div className="space-y-2 mt-4 font-mono text-[10px] text-slate-700 bg-white/50 p-3.5 rounded-2xl border border-white/75 shadow-inner">
             {defectChartData.slice(0, 4).map((defect, idx) => (
-              <div key={idx} className="flex justify-between items-center">
+              <div key={`defect-${defect.name}-${idx}`} className="flex justify-between items-center">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
                   <span className="truncate font-bold">{defect.name}</span>

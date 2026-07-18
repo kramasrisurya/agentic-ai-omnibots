@@ -242,7 +242,7 @@ export default function InspectionPage({
                 <div className="absolute inset-2 grid grid-cols-8 grid-rows-8 gap-0.5 opacity-20 pointer-events-none">
                   {heatmapGrid.map((val, idx) => (
                     <div
-                      key={idx}
+                      key={`heatmap-${idx}`}
                       style={{
                         backgroundColor:
                           inspectingItem.outcome === "rejected"

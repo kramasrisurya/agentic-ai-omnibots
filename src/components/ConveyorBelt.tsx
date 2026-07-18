@@ -240,7 +240,7 @@ export default function ConveyorBelt({
                   {/* Glowing micro-LED bulbs */}
                   {[...Array(6)].map((_, i) => (
                     <div
-                      key={i}
+                      key={`led-${i}`}
                       className="absolute w-1 h-1 rounded-full bg-white animate-pulse"
                       style={{
                         transform: `rotate(${i * 60}deg) translate(8px)`,

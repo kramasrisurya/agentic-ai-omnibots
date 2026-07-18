@@ -114,7 +114,7 @@ export default function Part3DModel({
               const angle = (i * Math.PI) / 4;
               const x = 50 + Math.cos(angle) * 33;
               const y = 50 + Math.sin(angle) * 19;
-              return <circle key={i} cx={x} cy={y} r="2" fill="#020617" opacity="0.8" />;
+              return <circle key={`brk-vent-${i}`} cx={x} cy={y} r="2" fill="#020617" opacity="0.8" />;
             })}
           </g>
 
@@ -257,7 +257,7 @@ export default function Part3DModel({
             const ry = 50 + Math.sin(angle) * 17;
             return (
               <circle
-                key={i}
+                key={`grb-rim-${i}`}
                 cx={rx}
                 cy={ry}
                 r="3"
@@ -289,7 +289,7 @@ export default function Part3DModel({
               const gy = 50 + Math.sin(angle) * 6;
               return (
                 <line
-                  key={i}
+                  key={`grb-tooth-${i}`}
                   x1="50"
                   y1="50"
                   x2={gx}

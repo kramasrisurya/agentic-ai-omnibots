@@ -22,7 +22,6 @@ interface TopBarProps {
   onToggleMode: () => void;
   onSpawnManual: () => void;
   canSpawnManual: boolean;
-  onRunSelfCheck: () => void;
   isSelfChecking: boolean;
   onEmergencyStop: () => void;
   notificationCount: number;
@@ -33,7 +32,6 @@ export default function TopBar({
   onToggleMode,
   onSpawnManual,
   canSpawnManual,
-  onRunSelfCheck,
   isSelfChecking,
   onEmergencyStop,
   notificationCount,
@@ -144,21 +142,7 @@ export default function TopBar({
           </motion.button>
         )}
 
-        {/* Self check testing trigger */}
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1, backgroundColor: "rgba(255, 255, 255, 0.85)" }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onRunSelfCheck}
-          disabled={isSelfChecking}
-          className={`px-3 py-1.5 rounded-xl border font-mono text-[11px] font-bold tracking-tight flex items-center gap-1 transition-all ${
-            isSelfChecking
-              ? "bg-white/20 border-white/20 text-slate-400 cursor-not-allowed animate-pulse"
-              : "bg-indigo-50/70 border-white/80 hover:border-white text-indigo-950 cursor-pointer shadow-sm"
-          }`}
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isSelfChecking ? "animate-spin" : ""}`} />
-          Run Audit Check
-        </motion.button>
+
 
         {/* EMERGENCY STOP BUTTON */}
         <motion.button

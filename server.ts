@@ -9,7 +9,7 @@ import { createServer as createHttpServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { AIService } from "./backend/mcp/services/ai.service";
-import { RAGService } from "./backend/rag/rag.service";
+import { RAGService, RAGDocument } from "./backend/rag/rag.service";
 import {
   PARTS_CATALOG,
   SUPPLIERS_DB,
@@ -108,7 +108,13 @@ async function runAgenticWorkflow(partId: string, partInstanceId: string, grade:
 
   // 1. Triage Agent: Visual scan evaluation via RAG ISO-9001 and Blueprint specs
   const triageQuery = `ISO 9001 defect tolerance and dimensions spec sheet for part ${part.part_id} ${part.name} under quality grade ${grade}`;
-  const triageContextDocs = await ragService.retrieveContext(triageQuery, 2);
+  
+  let triageContextDocs: RAGDocument[] = [];
+  try {
+    triageContextDocs = await ragService.retrieveContext(triageQuery, 2);
+  } catch (err) {
+    console.error("[AGENT-ORCHESTRATOR] RAG retrieval failed, proceeding without context:", err);
+  }
   const triageContextText = triageContextDocs.map(d => `[Document: ${d.title}]\n${d.content}`).join("\n\n");
 
   const triageLog = addAgentLog(
@@ -184,7 +190,12 @@ async function runAgenticWorkflow(partId: string, partInstanceId: string, grade:
 
     // SLA retrieval
     const slaQuery = `Supplier SLA logistics contracts and delivery pricing schedules for part ${part.part_id} ${part.name}`;
-    const slaDocs = await ragService.retrieveContext(slaQuery, 3);
+    let slaDocs: RAGDocument[] = [];
+    try {
+      slaDocs = await ragService.retrieveContext(slaQuery, 3);
+    } catch (err) {
+      console.error("[AGENT-ORCHESTRATOR] SLA RAG retrieval failed, proceeding without context:", err);
+    }
     const slaContextText = slaDocs.map(d => `[Contract: ${d.title}]\n${d.content}`).join("\n\n");
 
     const suppliers = SUPPLIERS_DB[part.part_id] || [];

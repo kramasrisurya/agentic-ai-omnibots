@@ -152,7 +152,7 @@ export default function LogsPage({ logs, onClearLogs }: LogsPageProps) {
           <div className="flex gap-1.5">
             {["ALL", "INFO", "WARNING", "DECISION"].map((type) => (
               <button
-                key={type}
+                key={`log-type-${type}`}
                 onClick={() => setFilterType(type as any)}
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold tracking-wider transition-all cursor-pointer ${
                   filterType === type

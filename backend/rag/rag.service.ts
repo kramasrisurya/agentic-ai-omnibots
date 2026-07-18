@@ -203,10 +203,10 @@ export class RAGService {
           doc.embedding = await this.getEmbedding(doc.content);
         } catch (err: any) {
           if (this.isEmbeddingServiceSuspended) {
-            console.log(`[RAG] Embedding initialization skipped for remaining documents because the API is suspended.`);
+            console.log(`[RAG] Embedding initialization skipped for remaining documents.`);
             break;
           }
-          console.error(`[RAG] Failed embedding for doc ${doc.id}:`, err);
+          console.log(`[RAG] Failed embedding for doc ${doc.id}: API quota/limit issue.`);
         }
       }
     }
@@ -250,28 +250,41 @@ export class RAGService {
   public async retrieveContext(query: string, limit = 2): Promise<RAGDocument[]> {
     // If Gemini client is ready, let's use semantic vector matching!
     if (this.ai) {
-      try {
-        // Wrap API call in a 350ms timeout to avoid blocking the conveyor pipeline if API is slow
-        const queryVector = await Promise.race([
-          this.getEmbedding(query),
-          new Promise<number[]>((_, reject) =>
-            setTimeout(() => reject(new Error("Embedding call timed out")), 350)
-          )
-        ]);
+      if (this.isEmbeddingServiceSuspended) {
+        // Check if suspension period (e.g., 5 minutes) has elapsed
+        if (Date.now() - this.lastSuspendedTime < 300000) {
+          console.log("[RAG] Vector retrieval skipped because embedding API is suspended.");
+          // Fallback to keyword search immediately
+        } else {
+          this.isEmbeddingServiceSuspended = false;
+          console.log("[RAG] 5 minutes elapsed. Resuming Gemini Embedding API checks.");
+        }
+      }
 
-        const scoredDocs = this.documents
-          .map(doc => {
-            if (doc.embedding) {
-              return { doc, score: this.cosineSimilarity(queryVector, doc.embedding) };
-            }
-            // Fallback to keyword matching if embedding is missing
-            return { doc, score: this.keywordMatchScore(doc.content, query) / 10 };
-          })
-          .sort((a, b) => b.score - a.score);
+      if (!this.isEmbeddingServiceSuspended) {
+        try {
+          // Wrap API call in a 350ms timeout to avoid blocking the conveyor pipeline if API is slow
+          const queryVector = await Promise.race([
+            this.getEmbedding(query),
+            new Promise<number[]>((_, reject) =>
+              setTimeout(() => reject(new Error("Embedding call timed out")), 350)
+            )
+          ]);
 
-        return scoredDocs.slice(0, limit).map(sd => sd.doc);
-      } catch (err) {
-        console.warn("[RAG] Vector retrieval failed or timed out, falling back to keyword search:", err);
+          const scoredDocs = this.documents
+            .map(doc => {
+              if (doc.embedding) {
+                return { doc, score: this.cosineSimilarity(queryVector, doc.embedding) };
+              }
+              // Fallback to keyword matching if embedding is missing
+              return { doc, score: this.keywordMatchScore(doc.content, query) / 10 };
+            })
+            .sort((a, b) => b.score - a.score);
+
+          return scoredDocs.slice(0, limit).map(sd => sd.doc);
+        } catch (err) {
+          console.log("[RAG] Vector retrieval unavailable (API quota/limit). Falling back to keyword search.");
+        }
       }
     }
 

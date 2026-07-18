@@ -547,7 +547,6 @@ export default function App() {
           }}
           onSpawnManual={handleSpawnManual}
           canSpawnManual={activeParts.length === 0}
-          onRunSelfCheck={runSelfCheck}
           isSelfChecking={isSelfChecking}
           onEmergencyStop={handleEmergencyStop}
           notificationCount={ledger.filter((l) => l.outcome === "rejected").length}
