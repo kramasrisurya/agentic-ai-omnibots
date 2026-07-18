@@ -55,30 +55,7 @@
 
 ---
 
-## 📖 Table of Contents
 
-<table>
-<tr>
-<td valign="top" width="50%">
-
-- [🧩 Problem Statement](#-problem-statement)
-- [💡 Proposed Solution](#-proposed-solution)
-- [🏗 Architecture](#-architecture)
-- [🤖 The Agent Pipeline](#-the-agent-pipeline)
-- [✨ Feature Walkthrough](#-feature-walkthrough)
-
-</td>
-<td valign="top" width="50%">
-
-- [🛠 Tech Stack](#-tech-stack)
-- [🖼 Screenshots](#-screenshots)
-- [🚀 Getting Started](#-getting-started)
-- [🗺 Roadmap](#-roadmap)
-- [📄 License](#-license)
-
-</td>
-</tr>
-</table>
 
 <div align="center">
 
