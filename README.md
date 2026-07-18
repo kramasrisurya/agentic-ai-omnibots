@@ -1,6 +1,15 @@
 <div align="center">
 
-<img width="100%" alt="banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:0F172A,100:6C5CE7&height=220&section=header&text=SYNTH-LINE%20VIRTUAL&fontSize=54&fontColor=ffffff&fontAlignY=38&desc=Autonomous%2C%20Criticality-Aware%20QC%20%26%20Procurement%20Orchestration&descAlignY=58&descSize=18&animation=fadeIn" />
+<br/>
+
+<h1>
+
+⚙️ &nbsp;S Y N T H - L I N E &nbsp; V I R T U A L
+
+</h1>
+
+<h3>Autonomous, Criticality-Aware QC & Procurement Orchestration</h3>
+<p><sub>Built entirely on <b>Nitrostack</b> — MCP · API · Cloud</sub></p>
 
 <br/>
 
@@ -204,8 +213,12 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <div align="center">
 
+<br/>
+
 Built by **Nithish Kumar S** · B.Tech CS, Amrita Vishwa Vidyapeetham
 
-<img width="100%" alt="footer" src="https://capsule-render.vercel.app/api?type=waving&color=0:6C5CE7,100:0F172A&height=100&section=footer" />
+<sub>⚙️ Powered end-to-end by Nitrostack — MCP · API · Cloud</sub>
+
+<br/><br/>
 
 </div>
