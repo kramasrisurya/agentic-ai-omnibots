@@ -16,6 +16,8 @@ export interface RAGDocument {
 export class RAGService {
   private documents: RAGDocument[] = [];
   private ai?: GoogleGenAI;
+  private isEmbeddingServiceSuspended = false;
+  private lastSuspendedTime = 0;
 
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -151,16 +153,42 @@ export class RAGService {
     if (!this.ai) {
       throw new Error("Gemini AI is not initialized (no key).");
     }
-    const response = await this.ai.models.embedContent({
-      model: "gemini-embedding-2-preview",
-      contents: text,
-    });
-    
-    const values = response.embeddings?.[0]?.values || (response as any).embedding?.values;
-    if (!values) {
-      throw new Error("No embedding values returned from model.");
+
+    if (this.isEmbeddingServiceSuspended) {
+      // Check if suspension period (e.g., 5 minutes) has elapsed
+      if (Date.now() - this.lastSuspendedTime < 300000) {
+        throw new Error("Gemini Embedding API is temporarily suspended due to quota limits (Rate Limit / Quota Exceeded).");
+      } else {
+        this.isEmbeddingServiceSuspended = false;
+        console.log("[RAG] 5 minutes elapsed since last quota issue. Resuming Gemini Embedding API checks.");
+      }
     }
-    return values;
+
+    try {
+      const response = await this.ai.models.embedContent({
+        model: "gemini-embedding-2-preview",
+        contents: text,
+      });
+      
+      const values = response.embeddings?.[0]?.values || (response as any).embedding?.values;
+      if (!values) {
+        throw new Error("No embedding values returned from model.");
+      }
+      return values;
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      if (
+        errMsg.includes("429") || 
+        errMsg.includes("quota") || 
+        errMsg.includes("RESOURCE_EXHAUSTED") || 
+        errMsg.includes("Quota exceeded")
+      ) {
+        this.isEmbeddingServiceSuspended = true;
+        this.lastSuspendedTime = Date.now();
+        console.warn("[RAG] Gemini Embedding API quota exceeded (429 / RESOURCE_EXHAUSTED). Temporarily suspending embedding service for 5 minutes and falling back to fast keyword search.");
+      }
+      throw err;
+    }
   }
 
   /**
@@ -173,7 +201,11 @@ export class RAGService {
       if (!doc.embedding) {
         try {
           doc.embedding = await this.getEmbedding(doc.content);
-        } catch (err) {
+        } catch (err: any) {
+          if (this.isEmbeddingServiceSuspended) {
+            console.log(`[RAG] Embedding initialization skipped for remaining documents because the API is suspended.`);
+            break;
+          }
           console.error(`[RAG] Failed embedding for doc ${doc.id}:`, err);
         }
       }

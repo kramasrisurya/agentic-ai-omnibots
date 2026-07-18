@@ -221,7 +221,7 @@ export default function SettingsPage({
 
             <div className="space-y-3 font-mono text-xs">
               <div className="space-y-1">
-                <span className="text-slate-600 text-[11px] block font-bold">Google Gemini API Secret Key</span>
+                <span className="text-slate-600 text-[11px] block font-bold">NITRO STACK API Secret Key</span>
                 <input
                   type="password"
                   disabled
@@ -229,7 +229,7 @@ export default function SettingsPage({
                   className="w-full bg-white/90 border border-slate-300 rounded-xl p-2.5 text-slate-500 shadow-inner font-bold"
                 />
                 <span className="text-[9px] text-slate-600 block leading-normal mt-1 font-sans font-semibold">
-                  The active environment automatically loads your Gemini API secret credentials on the server container.
+                  The active environment automatically loads your NITRO-STACK API secret credentials on the server container.
                 </span>
               </div>
             </div>
