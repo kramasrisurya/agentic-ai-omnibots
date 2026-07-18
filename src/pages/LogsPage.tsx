@@ -26,11 +26,19 @@ export default function LogsPage({ logs, onClearLogs }: LogsPageProps) {
   const [isStreaming, setIsStreaming] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll terminal to bottom when streaming new logs
+  // Auto-scroll terminal to bottom when streaming new logs, but only if user hasn't scrolled up
   useEffect(() => {
-    if (isStreaming && terminalEndRef.current) {
-      terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (isStreaming && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const threshold = 150; // generous pixel margin
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <= threshold;
+
+      if (isNearBottom && terminalEndRef.current) {
+        terminalEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     }
   }, [logs.length, isStreaming]);
 
@@ -47,6 +55,22 @@ export default function LogsPage({ logs, onClearLogs }: LogsPageProps) {
   });
 
   const handleDownload = () => {
+    if (!logs || logs.length === 0) return;
+    
+    const textContent = logs
+      .map((log) => `[${log.timestamp}] [${log.agent.toUpperCase()}] ${log.message}`)
+      .join("\n");
+      
+    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `system_logs_export_${Date.now()}.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
@@ -155,7 +179,10 @@ export default function LogsPage({ logs, onClearLogs }: LogsPageProps) {
         </div>
 
         {/* Real logs lines scroll area */}
-        <div className="flex-1 p-4 overflow-y-auto scroll-container font-mono text-xs leading-relaxed space-y-2 text-slate-800">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 p-4 overflow-y-auto scroll-container font-mono text-xs leading-relaxed space-y-2 text-slate-800"
+        >
           <div className="text-slate-500 text-[11px] select-none pb-2 border-b border-indigo-950/10 font-bold">
             * CENTRAL SYSTEM LOG BUFFER ACTIVE *
           </div>

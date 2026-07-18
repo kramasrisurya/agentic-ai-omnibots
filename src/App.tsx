@@ -61,15 +61,129 @@ export default function App() {
 
   // Counters for unique ID generation
   const instanceSeqRef = useRef<number>(1000);
-  const logSeqRef = useRef<number>(1);
   const autoSpawnCooldownRef = useRef<number>(1500); // initial delay before first spawn
-  const processedRef = useRef<Set<string>>(new Set());
 
-  // Get current timestamp formatted as HH:MM:SS
-  const getFormattedTime = () => {
-    const now = new Date();
-    return now.toTimeString().split(" ")[0];
+  // --- WEBSOCKET CLIENT CONFIGURATION ---
+  const wsRef = useRef<WebSocket | null>(null);
+
+  // Send message over WebSocket safely
+  const sendWsMessage = (type: string, payload?: any) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type, payload }));
+    }
   };
+
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    console.log(`[WS-CLIENT] Connecting to backend server: ${wsUrl}`);
+    const socket = new WebSocket(wsUrl);
+    wsRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("[WS-CLIENT] WebSocket channel successfully synchronized with central Factory OS.");
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        console.log(`[WS-CLIENT] Broadcast received: ${message.type}`, message.payload);
+
+        switch (message.type) {
+          case "STATE_SYNC":
+            setIsAutoMode(message.payload.isAutoMode);
+            setInjectionGrade(message.payload.injectionGrade);
+            setLedger(message.payload.ledger);
+            setAgentLogs(message.payload.agentLogs);
+            setIsSelfChecking(message.payload.isSelfChecking);
+            break;
+
+          case "STATE_UPDATED":
+            if (message.payload.isAutoMode !== undefined) setIsAutoMode(message.payload.isAutoMode);
+            if (message.payload.injectionGrade !== undefined) setInjectionGrade(message.payload.injectionGrade);
+            if (message.payload.isSelfChecking !== undefined) setIsSelfChecking(message.payload.isSelfChecking);
+            break;
+
+          case "AGENT_LOG_GENERATED":
+            setAgentLogs((prev) => {
+              if (prev.some((log) => log.id === message.payload.id)) return prev;
+              return [...prev, message.payload];
+            });
+            break;
+
+          case "LEDGER_UPDATED":
+            setLedger((prev) => {
+              if (prev.some((entry) => entry.id === message.payload.id)) return prev;
+              return [message.payload, ...prev];
+            });
+            break;
+
+          case "PART_SPAWNED_MANUAL":
+            spawnPart(message.payload.part, message.payload.grade);
+            break;
+
+          case "INSPECTION_RESOLVED":
+            const res = message.payload;
+            setActiveParts((prevParts) =>
+              prevParts.map((p) => {
+                if (p.id === res.partInstanceId) {
+                  return {
+                    ...p,
+                    outcome: res.outcome,
+                    defectType: res.defectType,
+                    chosenSupplierId: res.chosenSupplierId,
+                    chosenSupplierName: res.chosenSupplierName,
+                    orderCost: res.orderCost,
+                    deliveryDays: res.deliveryDays,
+                    tradeOffIgnored: res.tradeOffIgnored,
+                    holdTicks: 25, // allow transition out immediately
+                  };
+                }
+                return p;
+              })
+            );
+
+            // If we are currently executing self-checks, update validation feedback
+            if (isSelfChecking) {
+              if (res.criticality === "critical" || res.part_id === "SNS-07") {
+                const isCorrect = res.chosenSupplierId === "S1-A";
+                setSelfCheckReport((prev) => ({
+                  ...prev!,
+                  criticalPassed: isCorrect,
+                  criticalDetails: `Part SNS-07 (Critical): Expected premium next-day carrier (S1-A, $450). Selected: ${res.chosenSupplierName || "None"} ($${res.orderCost || 0}). Verification: ${isCorrect ? "PASS" : "FAIL"}.`,
+                }));
+              } else if (res.criticality === "low-priority" || res.part_id === "PNL-01") {
+                const isCorrect = res.chosenSupplierId === "S6-B";
+                setSelfCheckReport((prev) => ({
+                  ...prev!,
+                  lowPassed: isCorrect,
+                  lowDetails: `Part PNL-01 (Low-priority): Expected economy ground bulk (S6-B, $45). Selected: ${res.chosenSupplierName || "None"} ($${res.orderCost || 0}). Verification: ${isCorrect ? "PASS" : "FAIL"}.`,
+                }));
+              }
+            }
+            break;
+
+          case "START_SELF_CHECK_TESTS":
+            runSelfCheckTests();
+            break;
+
+          case "HALT_BELT":
+            setActiveParts([]);
+            break;
+        }
+      } catch (err: any) {
+        console.error("[WS-CLIENT] Failed to decode server payload:", err.message);
+      }
+    };
+
+    socket.onclose = () => {
+      console.warn("[WS-CLIENT] WebSocket link lost. Re-establishing standby...");
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [isSelfChecking]);
 
   // --- DYNAMIC INVENTORY STATISTICS ---
   const computeStats = (): InventoryStats => {
@@ -90,37 +204,16 @@ export default function App() {
 
   const stats = computeStats();
 
-  // --- LOGGING HELPER ---
-  const addAgentLog = (
-    agent: "Triage Agent" | "Procurement Agent" | "System Check",
-    message: string,
-    type: "info" | "warning" | "success" | "decision",
-    partId?: string
-  ) => {
-    const newEntry: AgentLogEntry = {
-      id: `LOG-${logSeqRef.current++}`,
-      timestamp: getFormattedTime(),
-      agent,
-      message,
-      type,
-      partId,
-    };
-    setAgentLogs((prev) => [...prev, newEntry]);
-  };
-
   // --- PART SPAWNER ---
-  const spawnPart = (forcedPart?: Part): string => {
+  const spawnPart = (forcedPart?: Part, forcedGrade?: 'good' | 'average' | 'poor'): string => {
     const seqId = `TX-${instanceSeqRef.current++}`;
     const partTemplate = forcedPart || PARTS_CATALOG[Math.floor(Math.random() * PARTS_CATALOG.length)];
-    
-    // Determine grade based on selection
+
     let grade: 'good' | 'average' | 'poor';
-    if (forcedPart) {
-      if (injectionGrade === 'random') {
-        grade = partTemplate.typical_grade || 'good';
-      } else {
-        grade = injectionGrade;
-      }
+    if (forcedGrade) {
+      grade = forcedGrade;
+    } else if (forcedPart) {
+      grade = injectionGrade === 'random' ? (partTemplate.typical_grade || 'good') : injectionGrade;
     } else {
       if (injectionGrade !== 'random') {
         grade = injectionGrade;
@@ -144,178 +237,15 @@ export default function App() {
     return seqId;
   };
 
-  // --- THE TWO-AGENT DECISION PIPELINE ---
-  const executePipeline = (
-    partInstanceId: string,
-    part: Part,
-    outcome: "passed" | "rejected",
-    defectType?: string,
-    grade?: 'good' | 'average' | 'poor'
-  ) => {
-    if (processedRef.current.has(partInstanceId)) {
-      return;
-    }
-    processedRef.current.add(partInstanceId);
-
-    const timestamp = getFormattedTime();
-
-    if (outcome === "passed") {
-      if (grade === "average") {
-        addAgentLog(
-          "Triage Agent",
-          `Inspected part instance ${partInstanceId} (${part.name}).\nVisual OpenCV contour analysis: Minor cosmetic variance (Average Grade).\nPart dimensions within engineering tolerance limits.\nPolicy override: AUTOMATIC PASS with DOWNSTREAM MANUAL VERIFY tag. Keeping the production line running continuously!`,
-          "warning",
-          part.part_id
-        );
-      } else {
-        addAgentLog(
-          "Triage Agent",
-          `Inspected part instance ${partInstanceId} (${part.name}).\nVisual OpenCV contour analysis: 0 anomalies detected.\nPart dimensions within ±0.05mm engineering tolerance.\nChecked MCP Resource 'part-criticality-registry' for status clearance.\nPart ${part.part_id} is cleared. Logging PASS event to ledger. No procurement required.`,
-          "success",
-          part.part_id
-        );
-      }
-
-      const newLedgerEntry: LedgerEntry = {
-        id: partInstanceId,
-        part_id: part.part_id,
-        part_name: part.name,
-        criticality: part.criticality,
-        outcome: "passed",
-        timestamp,
-        grade,
-      };
-      setLedger((prev) => {
-        if (prev.some((entry) => entry.id === partInstanceId)) {
-          return prev;
-        }
-        return [newLedgerEntry, ...prev];
-      });
-
-    } else {
-      // Access custom defect types defined for this specific part, or fallback
-      const partDefects = part.defect_types && part.defect_types.length > 0 
-        ? part.defect_types 
-        : DEFECT_TYPES;
-      const chosenDefect = defectType || partDefects[Math.floor(Math.random() * partDefects.length)];
-      
-      addAgentLog(
-        "Triage Agent",
-        `ALERT: Defect detected on part instance ${partInstanceId} (${part.name})!\nDefect signature: '${chosenDefect}'.\nCalling MCP TOOL 'reject_item' to flag instance state as REJECTED.\nQuerying MCP RESOURCE 'part-criticality-registry' for criticality class.\nRESULT: Part ${part.part_id} has a criticality level of [${part.criticality.toUpperCase()}].\nEscalating logs and routing replacement request to Procurement Agent.`,
-        "warning",
-        part.part_id
-      );
-
-      const suppliers = SUPPLIERS_DB[part.part_id] || [];
-      let chosenSupplier: Supplier;
-      let tradeOffIgnored = "";
-
-      // Count current rejections for this specific part in the ledger
-      const defectCount = ledger.filter(
-        (entry) => entry.part_id === part.part_id && entry.outcome === "rejected"
-      ).length;
-
-      // POLICY RULE:
-      // - If "more defective parts are there" (defectCount >= 8, representing high urgency/nearly 10 defects),
-      //   or during critical self-check tests, urgency is critical -> Choose FASTEST delivery even if cost/shipping is high.
-      // - If defective parts are less (e.g., around 3 defects) -> Choose CHEAPEST/LATE standard option to save costs.
-      const hasMoreDefects = defectCount >= 8 || (isSelfChecking && part.criticality === "critical");
-
-      if (hasMoreDefects) {
-        // Urgent Sourcing: Speed/Fastest Priority
-        const sortedSuppliers = [...suppliers].sort((a, b) => {
-          if (a.delivery_days !== b.delivery_days) {
-            return a.delivery_days - b.delivery_days;
-          }
-          return a.cost - b.cost;
-        });
-        chosenSupplier = sortedSuppliers[0];
-
-        const cheapestSupplier = [...suppliers].sort((a, b) => a.cost - b.cost)[0];
-        if (chosenSupplier.supplier_id !== cheapestSupplier.supplier_id) {
-          const savingsDiff = chosenSupplier.cost - cheapestSupplier.cost;
-          tradeOffIgnored = `Priority: SPEED/FASTEST (HIGH DEFECT COUNT: ${defectCount} parts rejected - nearly 10). Sourced fastest delivery from ${chosenSupplier.name} to avoid line-stoppage risk, despite high cost (ignored saving $${savingsDiff} from ${cheapestSupplier.name}).`;
-        } else {
-          tradeOffIgnored = `Fastest supplier happens to be the most cost-effective. No cost trade-off required.`;
-        }
-
-      } else {
-        // Stable Sourcing: Budget/Standard Priority
-        const sortedSuppliers = [...suppliers].sort((a, b) => {
-          if (a.cost !== b.cost) {
-            return a.cost - b.cost;
-          }
-          return a.delivery_days - b.delivery_days;
-        });
-        chosenSupplier = sortedSuppliers[0];
-
-        const fastestSupplier = [...suppliers].sort((a, b) => a.delivery_days - b.delivery_days)[0];
-        if (chosenSupplier.supplier_id !== fastestSupplier.supplier_id) {
-          const dayDiff = chosenSupplier.delivery_days - fastestSupplier.delivery_days;
-          tradeOffIgnored = `Priority: SAVINGS (LOW DEFECT COUNT: ${defectCount} parts rejected - under 8). Sourced lowest cost from ${chosenSupplier.name}, opting for slower shipping (+${dayDiff} days) to minimize procurement expenditure.`;
-        } else {
-          tradeOffIgnored = `Cheapest supplier happens to be the fastest option. No lead-time trade-off required.`;
-        }
-      }
-
-      addAgentLog(
-        "Procurement Agent",
-        `Received triage report for rejected part ${part.part_id} (${part.name}).\nActive ledger rejections for this part: ${defectCount} units.\nPolicy choice: ${hasMoreDefects ? "EXPRESS/SPEED SOURCING (High Defect Urgency - nearly 10 defects)" : "ECONOMY/STANDARD SOURCING (Low Defect Urgency - low defects)"}.\nCalling MCP TOOL 'search_suppliers' for part ${part.part_id}.\n\nDECISION ASSIGNMENT:\n- Supplier: [${chosenSupplier.name}]\n- Cost: $${chosenSupplier.cost}, Delivery Time: ${chosenSupplier.delivery_days} day(s).\n- Policy trace: ${tradeOffIgnored}\nCalling MCP TOOL 'place_order' to execute transaction.`,
-        "decision",
-        part.part_id
-      );
-
-      const newLedgerEntry: LedgerEntry = {
-        id: partInstanceId,
-        part_id: part.part_id,
-        part_name: part.name,
-        criticality: part.criticality,
-        outcome: "rejected",
-        timestamp,
-        defectType: chosenDefect,
-        chosenSupplierId: chosenSupplier.supplier_id,
-        chosenSupplierName: chosenSupplier.name,
-        orderCost: chosenSupplier.cost,
-        deliveryDays: chosenSupplier.delivery_days,
-        tradeOffIgnored,
-      };
-      setLedger((prev) => {
-        if (prev.some((entry) => entry.id === partInstanceId)) {
-          return prev;
-        }
-        return [newLedgerEntry, ...prev];
-      });
-
-      if (isSelfChecking) {
-        if (selfCheckStep === 1 && part.criticality === "critical") {
-          const isCorrect = chosenSupplier.supplier_id === "S1-A";
-          setSelfCheckReport((prev) => ({
-            ...prev!,
-            criticalPassed: isCorrect,
-            criticalDetails: `Part SNS-07 (Critical): Expected fastest (S1-A, $450, 1d). Selected: ${chosenSupplier.name} ($${chosenSupplier.cost}, ${chosenSupplier.delivery_days}d). Verification: ${isCorrect ? "PASS" : "FAIL"}.`,
-          }));
-        } else if (selfCheckStep === 2 && part.criticality === "low-priority") {
-          const isCorrect = chosenSupplier.supplier_id === "S6-B";
-          setSelfCheckReport((prev) => ({
-            ...prev!,
-            lowPassed: isCorrect,
-            lowDetails: `Part PNL-01 (Low-priority): Expected cheapest (S6-B, $45, 14d). Selected: ${chosenSupplier.name} ($${chosenSupplier.cost}, ${chosenSupplier.delivery_days}d). Verification: ${isCorrect ? "PASS" : "FAIL"}.`,
-          }));
-        }
-      }
-    }
-  };
-
   // --- TICK LOOP (40ms) ---
   useEffect(() => {
     const tickInterval = setInterval(() => {
       setActiveParts((prevParts) => {
         const updatedParts: any[] = [];
-        
+
         for (let i = 0; i < prevParts.length; i++) {
           const part = prevParts[i];
-          
-          // Find first preceding part that is still horizontally on the belt
+
           let aheadPartOnBelt: any = null;
           for (let j = i - 1; j >= 0; j--) {
             const p = updatedParts[j];
@@ -324,25 +254,32 @@ export default function App() {
               break;
             }
           }
-          
+
           const MIN_GAP = 18;
           let maxAllowedProgress = 100;
           if (aheadPartOnBelt) {
             const aheadPos = aheadPartOnBelt.status === "inspecting" ? 50 : aheadPartOnBelt.progress;
             maxAllowedProgress = aheadPos - MIN_GAP;
           }
-          
-          const isScanningStationOccupied = updatedParts.some(p => p.status === "inspecting");
+
+          const isScanningStationOccupied = updatedParts.some((p) => p.status === "inspecting");
 
           if (part.status === "approaching") {
             let nextProgress = part.progress + 0.6;
-            
+
             if (nextProgress > maxAllowedProgress) {
               nextProgress = Math.max(part.progress, maxAllowedProgress);
             }
-            
+
             if (nextProgress >= 50) {
               if (!isScanningStationOccupied) {
+                // PART ARRIVED AT SCANNING WINDOW: Signal backend RAG agents
+                sendWsMessage("REACHED_SCANNER", {
+                  partId: part.part.part_id,
+                  partInstanceId: part.id,
+                  grade: part.grade,
+                });
+
                 updatedParts.push({
                   ...part,
                   progress: 50,
@@ -363,52 +300,15 @@ export default function App() {
               });
             }
           } else if (part.status === "inspecting") {
-            let updatedPart = { ...part };
-            const ticks = updatedPart.holdTicks ?? 0;
-
-            if (isAutoMode && updatedPart.outcome === "pending" && !isSelfChecking) {
-              // Delay decision until tick 25 (about 1 second) to let the pipeline timeline unfold realistically!
-              if (ticks >= 25) {
-                const decidedOutcome = updatedPart.grade === "poor" ? ("rejected" as const) : ("passed" as const);
-                const defectType = decidedOutcome === "rejected"
-                  ? updatedPart.part.defect_types?.[Math.floor(Math.random() * updatedPart.part.defect_types.length)] || "Surface Solder Crack"
-                  : undefined;
-                
-                executePipeline(updatedPart.id, updatedPart.part, decidedOutcome, defectType, updatedPart.grade);
-
-                updatedPart = {
-                  ...updatedPart,
-                  outcome: decidedOutcome,
-                  defectType,
-                  // If passed, set holdTicks high so it leaves the station immediately!
-                  // If rejected, set to 25 so it continues through stages 4 to 8 slowly.
-                  holdTicks: decidedOutcome === "passed" ? 38 : 25,
-                };
-              } else {
-                updatedPart = { ...updatedPart, holdTicks: ticks + 1 };
-              }
-            } else if (updatedPart.outcome === "pending") {
-              // Manual mode or self-checking: accumulate ticks
-              updatedPart = { ...updatedPart, holdTicks: ticks + 1 };
-            }
-
+            const updatedPart = { ...part };
+            
+            // Wait stationary until backend updates the outcome
             if (updatedPart.outcome !== "pending") {
-              const currentTicks = updatedPart.holdTicks ?? 0;
-              // If passed, wait until 38 ticks (which is immediately met if we fast-forwarded to 38).
-              // If rejected, wait until 50 ticks to show all stages clearly.
-              const ticksThreshold = updatedPart.outcome === "passed" ? 38 : 50;
-              if (currentTicks >= ticksThreshold) {
-                updatedParts.push({
-                  ...updatedPart,
-                  status: updatedPart.outcome === "passed" ? ("passed_moving" as const) : ("rejecting" as const),
-                  progress: updatedPart.outcome === "passed" ? 50.6 : 50,
-                });
-              } else {
-                updatedParts.push({
-                  ...updatedPart,
-                  holdTicks: currentTicks + 1,
-                });
-              }
+              updatedParts.push({
+                ...updatedPart,
+                status: updatedPart.outcome === "passed" ? ("passed_moving" as const) : ("rejecting" as const),
+                progress: updatedPart.outcome === "passed" ? 50.6 : 50,
+              });
             } else {
               updatedParts.push(updatedPart);
             }
@@ -433,10 +333,11 @@ export default function App() {
             updatedParts.push(part);
           }
         }
-        
+
         return updatedParts.filter((p) => p.status !== "done");
       });
 
+      // Spawn new items in autopilot mode
       if (isAutoMode && !isSelfChecking) {
         autoSpawnCooldownRef.current -= 40;
         if (autoSpawnCooldownRef.current <= 0) {
@@ -455,121 +356,83 @@ export default function App() {
     outcome: "passed" | "rejected",
     defectType?: string
   ) => {
-    setActiveParts((prev) =>
-      prev.map((p) => {
-        if (p.id === partInstanceId) {
-          executePipeline(partInstanceId, p.part, outcome, defectType, p.grade);
-          return {
-            ...p,
-            outcome,
-            holdTicks: 0,
-            defectType,
-          };
-        }
-        return p;
-      })
-    );
+    const partToResolve = activeParts.find((p) => p.id === partInstanceId);
+    if (partToResolve) {
+      sendWsMessage("MANUAL_RESOLVE", {
+        partId: partToResolve.part.part_id,
+        partInstanceId,
+        outcome,
+        grade: partToResolve.grade,
+        defectType,
+      });
+    }
   };
 
-  // --- SELF CHECK UNIT-TEST DRIVER ---
-  const runSelfCheck = () => {
-    setIsAutoMode(false);
-    setIsSelfChecking(true);
+  // Run self check suite coordinated via the backend
+  const runSelfCheckTests = () => {
     setSelfCheckStep(1);
-    setActiveParts([]);
     setSelfCheckReport({
       criticalPassed: false,
       lowPassed: false,
     });
 
-    addAgentLog(
-      "System Check",
-      `LAUNCHING INTEGRATED AGENT SELF-CHECK COMPLIANCE VERIFIER...\nToggling Auto mode to OFF to prevent race conditions.\nClearing conveyor belt stage.\nPreparing test case 1/2: Critical part reorder decision rules audit.`,
-      "info"
-    );
-
     const criticalPart = PARTS_CATALOG.find((p) => p.part_id === "SNS-07")!;
-    const p1Id = spawnPart(criticalPart);
+    const p1Id = spawnPart(criticalPart, "poor");
 
     const checkP1AtScanner = setInterval(() => {
       setActiveParts((prev) => {
         const item = prev.find((p) => p.id === p1Id);
-        if (item && item.status === "inspecting" && item.outcome === "pending") {
+        if (item && item.status === "inspecting" && item.outcome !== "pending") {
           clearInterval(checkP1AtScanner);
-          
-          setTimeout(() => {
-            handleManualResolve(p1Id, "rejected", "Thermal Signature Anomaly");
-            
-            setTimeout(() => {
-              setSelfCheckStep(2);
-              addAgentLog(
-                "System Check",
-                `Test case 1/2 complete. Initializing test case 2/2: Low-priority part reorder decision rules audit.`,
-                "info"
-              );
-              
-              const lowPart = PARTS_CATALOG.find((p) => p.part_id === "PNL-01")!;
-              const p2Id = spawnPart(lowPart);
 
-              const checkP2AtScanner = setInterval(() => {
-                setActiveParts((prev2) => {
-                  const item2 = prev2.find((p) => p.id === p2Id);
-                  if (item2 && item2.status === "inspecting" && item2.outcome === "pending") {
-                    clearInterval(checkP2AtScanner);
-                    
-                    setTimeout(() => {
-                      handleManualResolve(p2Id, "rejected", "Surface Scratch (>5mm)");
-                      
-                      setTimeout(() => {
-                        setIsSelfChecking(false);
-                        setSelfCheckStep(0);
-                        
-                        addAgentLog(
-                          "System Check",
-                          `SELF-CHECK COMPLETED SUCCESSFULY.\nVerify decisions match expected mathematical logic branches:\n- Critical part (SNS-07) replacement SOURCED: Apex Fast-Track Solutions (1d delivery, ignoring cheaper pricing).\n- Low-priority part (PNL-01) replacement SOURCED: General Sheet Metal Supply ($45 cost, ignoring faster delivery).\nAll rule assertions are fully compliant [OK].`,
-                          "info"
-                        );
-                      }, 2500);
-                    }, 800);
-                  }
-                  return prev2;
-                });
-              }, 100);
-            }, 2500);
-          }, 800);
+          setTimeout(() => {
+            setSelfCheckStep(2);
+            const lowPart = PARTS_CATALOG.find((p) => p.part_id === "PNL-01")!;
+            const p2Id = spawnPart(lowPart, "poor");
+
+            const checkP2AtScanner = setInterval(() => {
+              setActiveParts((prev2) => {
+                const item2 = prev2.find((p) => p.id === p2Id);
+                if (item2 && item2.status === "inspecting" && item2.outcome !== "pending") {
+                  clearInterval(checkP2AtScanner);
+
+                  setTimeout(() => {
+                    setSelfCheckStep(0);
+                    sendWsMessage("SELF_CHECK_FINISHED");
+                  }, 2500);
+                }
+                return prev2;
+              });
+            }, 100);
+          }, 2500);
         }
         return prev;
       });
     }, 100);
   };
 
-  // --- EMERGENCY STOP HANDLER ---
+  const runSelfCheck = () => {
+    sendWsMessage("RUN_SELF_CHECK");
+  };
+
   const handleEmergencyStop = () => {
-    setActiveParts([]);
-    setIsAutoMode(false);
-    setIsSelfChecking(false);
-    setSelfCheckStep(0);
-    addAgentLog(
-      "System Check",
-      `🚨 EMERGENCY STOP INITIATED BY OPERATOR! Halting all simulated conveyors. Flushed diagnostic pipeline slots. Sourcing requests frozen. Manual safety inspection required.`,
-      "warning"
-    );
+    sendWsMessage("EMERGENCY_STOP");
   };
 
   const handleSpawnManual = () => {
     if (!isAutoMode && activeParts.length === 0) {
-      spawnPart();
+      sendWsMessage("SPAWN_PART_MANUAL", {
+        partId: PARTS_CATALOG[Math.floor(Math.random() * PARTS_CATALOG.length)].part_id,
+        grade: "good",
+      });
     }
   };
 
   const handleInjectPart = (part: Part) => {
-    spawnPart(part);
-    addAgentLog(
-      "System Check",
-      `MANUAL INJECT SEQUENCE: Initiated full-spectrum visual scan and sourcing compliance check for Part ${part.part_id} (${part.name}).`,
-      "info",
-      part.part_id
-    );
+    sendWsMessage("SPAWN_PART_MANUAL", {
+      partId: part.part_id,
+      grade: injectionGrade === 'random' ? 'poor' : injectionGrade,
+    });
   };
 
   const handlePartDropped = (partId: string) => {
@@ -580,13 +443,14 @@ export default function App() {
   };
 
   const handleAddLedgerEntry = (entry: LedgerEntry) => {
-    setLedger((prev) => [entry, ...prev]);
-    addAgentLog(
-      "Procurement Agent",
-      `MANUAL PROCUREMENT CONTRACT AUTHORIZED: Appended Order ID ${entry.id} for Part ${entry.part_id} with Supplier [${entry.chosenSupplierName}] costing $${entry.orderCost}.`,
-      "success",
-      entry.part_id
-    );
+    // Treat as manual placement
+    sendWsMessage("MANUAL_RESOLVE", {
+      partId: entry.part_id,
+      partInstanceId: entry.id,
+      outcome: "rejected",
+      grade: "poor",
+      defectType: entry.defectType,
+    });
   };
 
   // --- SIDEBAR NAVIGATION LINKS ---

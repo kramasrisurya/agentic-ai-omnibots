@@ -45,6 +45,54 @@ export default function AuditPage({ ledger }: AuditPageProps) {
   // Handle export trigger
   const [showExportToast, setShowExportToast] = useState(false);
   const triggerExport = () => {
+    if (!ledger || ledger.length === 0) return;
+
+    const itemsToExport = ledger.filter((l) => l.outcome === "rejected");
+    if (itemsToExport.length === 0) return;
+
+    const csvRows = [
+      ["ID", "Part ID", "Part Name", "Criticality", "Outcome", "Timestamp", "Defect Type", "Grade", "Supplier ID", "Supplier Name", "Cost ($)", "Delivery Days", "Trade-Off/Sourcing Note"]
+    ];
+
+    itemsToExport.forEach((item) => {
+      csvRows.push([
+        item.id,
+        item.part_id,
+        item.part_name,
+        item.criticality,
+        item.outcome,
+        item.timestamp,
+        item.defectType || "N/A",
+        item.grade || "N/A",
+        item.chosenSupplierId || "N/A",
+        item.chosenSupplierName || "N/A",
+        item.orderCost ? `$${item.orderCost}` : "N/A",
+        item.deliveryDays ? `${item.deliveryDays}d` : "N/A",
+        item.tradeOffIgnored || ""
+      ]);
+    });
+
+    const csvContent = csvRows
+      .map((row) =>
+        row
+          .map((val) => {
+            const escaped = String(val).replace(/"/g, '""');
+            return `"${escaped}"`;
+          })
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `quality_audit_report_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     setShowExportToast(true);
     setTimeout(() => {
       setShowExportToast(false);
