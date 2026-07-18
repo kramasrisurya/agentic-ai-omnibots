@@ -24,7 +24,7 @@
 <br/>
 
 <a href="https://synth-line-omni-6-omni-bots-amrita-university-amritapuri-campus.app.nitrocloud.ai">
-  <img src="https://img.shields.io/badge/%F0%9F%9A%80%20LAUNCH%20LIVE%20DEMO-6C5CE7?style=for-the-badge&labelColor=0F172A&logo=vercel&logoColor=white" alt="Launch Live Demo" />
+  <img src="https://img.shields.io/badge/%F0%9F%9A%80%20CLICK%20TO%20LIVE%20DEMO-6C5CE7?style=for-the-badge&labelColor=0F172A&logo=vercel&logoColor=white" alt="Launch Live Demo" />
 </a>
 
 <br/><br/>
