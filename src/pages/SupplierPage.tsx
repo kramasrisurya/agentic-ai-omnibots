@@ -16,6 +16,7 @@ import {
   Coins,
   Cpu,
   BookmarkCheck,
+  ExternalLink,
 } from "lucide-react";
 import { PARTS_CATALOG, SUPPLIERS_DB, Part, Supplier } from "../types";
 import Part3DModel from "../components/Part3DModel";
@@ -137,7 +138,7 @@ export default function SupplierPage() {
               
               {/* FASTEST */}
               {fastestSupplier && (
-                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden h-[240px] hover:border-rose-500/40 hover:bg-white/70 transition-all shadow-sm">
+                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden min-h-[270px] hover:border-rose-500/40 hover:bg-white/70 transition-all shadow-sm">
                   <div className="absolute top-0 right-0 p-2 bg-rose-500/15 border-b border-l border-rose-500/35 rounded-bl-lg text-[8px] font-mono text-rose-700 font-black uppercase tracking-widest">
                     Fastest Delivery
                   </div>
@@ -147,7 +148,7 @@ export default function SupplierPage() {
                     <span className="text-[9px] font-mono text-slate-600 font-bold block">ID: {fastestSupplier.supplier_id}</span>
                   </div>
 
-                  <div className="py-4 space-y-2 border-y border-white/60 font-mono">
+                  <div className="py-2.5 space-y-1.5 border-y border-white/60 font-mono">
                     <div className="flex justify-between text-xs font-bold text-slate-700">
                       <span>Lead Time:</span>
                       <span className="text-rose-600 font-black flex items-center gap-1">
@@ -160,15 +161,27 @@ export default function SupplierPage() {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-800 leading-snug pt-2 font-medium">
+                  <p className="text-[10px] text-slate-800 leading-snug pt-1 font-medium">
                     Priority shipping route via express aerospace carrier. Clears customs in 2h.
                   </p>
+
+                  {fastestSupplier.website && (
+                    <a
+                      href={fastestSupplier.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center justify-center gap-1.5 w-full py-1.5 text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 rounded-lg font-bold transition-all shadow-sm"
+                    >
+                      <ExternalLink className="w-3 h-3 text-indigo-600" />
+                      <span>View Part &amp; Price</span>
+                    </a>
+                  )}
                 </div>
               )}
 
               {/* CHEAPEST */}
               {cheapestSupplier && (
-                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden h-[240px] hover:border-emerald-500/40 hover:bg-white/70 transition-all shadow-sm">
+                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden min-h-[270px] hover:border-emerald-500/40 hover:bg-white/70 transition-all shadow-sm">
                   <div className="absolute top-0 right-0 p-2 bg-emerald-500/15 border-b border-l border-emerald-500/35 rounded-bl-lg text-[8px] font-mono text-emerald-700 font-black uppercase tracking-widest">
                     Lowest Cost
                   </div>
@@ -178,7 +191,7 @@ export default function SupplierPage() {
                     <span className="text-[9px] font-mono text-slate-600 font-bold block">ID: {cheapestSupplier.supplier_id}</span>
                   </div>
 
-                  <div className="py-4 space-y-2 border-y border-white/60 font-mono">
+                  <div className="py-2.5 space-y-1.5 border-y border-white/60 font-mono">
                     <div className="flex justify-between text-xs font-bold text-slate-700">
                       <span>Lead Time:</span>
                       <span className="text-indigo-950 font-black">{cheapestSupplier.delivery_days} Days</span>
@@ -191,15 +204,27 @@ export default function SupplierPage() {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-800 leading-snug pt-2 font-medium">
+                  <p className="text-[10px] text-slate-800 leading-snug pt-1 font-medium">
                     Bulk cargo oceanic/train route. Extended lead times. Standard quality validation.
                   </p>
+
+                  {cheapestSupplier.website && (
+                    <a
+                      href={cheapestSupplier.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center justify-center gap-1.5 w-full py-1.5 text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 rounded-lg font-bold transition-all shadow-sm"
+                    >
+                      <ExternalLink className="w-3 h-3 text-indigo-600" />
+                      <span>View Part &amp; Price</span>
+                    </a>
+                  )}
                 </div>
               )}
 
               {/* BALANCED */}
               {balancedSupplier && (
-                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden h-[240px] hover:border-cyan-500/40 hover:bg-white/70 transition-all shadow-sm">
+                <div className="bg-white/60 border border-white/80 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden min-h-[270px] hover:border-cyan-500/40 hover:bg-white/70 transition-all shadow-sm">
                   <div className="absolute top-0 right-0 p-2 bg-cyan-500/15 border-b border-l border-cyan-500/35 rounded-bl-lg text-[8px] font-mono text-cyan-700 font-black uppercase tracking-widest">
                     Balanced Range
                   </div>
@@ -209,7 +234,7 @@ export default function SupplierPage() {
                     <span className="text-[9px] font-mono text-slate-600 font-bold block">ID: {balancedSupplier.supplier_id}</span>
                   </div>
 
-                  <div className="py-4 space-y-2 border-y border-white/60 font-mono">
+                  <div className="py-2.5 space-y-1.5 border-y border-white/60 font-mono">
                     <div className="flex justify-between text-xs font-bold text-slate-700">
                       <span>Lead Time:</span>
                       <span className="text-slate-800 font-black">{balancedSupplier.delivery_days} Days</span>
@@ -220,9 +245,21 @@ export default function SupplierPage() {
                     </div>
                   </div>
 
-                  <p className="text-[10px] text-slate-800 leading-snug pt-2 font-medium">
+                  <p className="text-[10px] text-slate-800 leading-snug pt-1 font-medium">
                     Truck line logistics. Intermediate cost range. Moderate supply chain resilience.
                   </p>
+
+                  {balancedSupplier.website && (
+                    <a
+                      href={balancedSupplier.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-flex items-center justify-center gap-1.5 w-full py-1.5 text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 rounded-lg font-bold transition-all shadow-sm"
+                    >
+                      <ExternalLink className="w-3 h-3 text-indigo-600" />
+                      <span>View Part &amp; Price</span>
+                    </a>
+                  )}
                 </div>
               )}
 

@@ -19,6 +19,7 @@ export interface Supplier {
   name: string;
   cost: number;
   delivery_days: number;
+  website?: string;
 }
 
 export interface InventoryStats {
@@ -43,6 +44,7 @@ export interface LedgerEntry {
   // If rejected, these are filled by the Procurement Agent
   chosenSupplierId?: string;
   chosenSupplierName?: string;
+  chosenSupplierWebsite?: string;
   orderCost?: number;
   deliveryDays?: number;
   tradeOffIgnored?: string;
@@ -171,44 +173,44 @@ export const PARTS_CATALOG: Part[] = [
 // - One balanced (middle)
 export const SUPPLIERS_DB: Record<string, Supplier[]> = {
   "SNS-07": [
-    { supplier_id: "S1-A", name: "Apex Fast-Track Solutions", cost: 450, delivery_days: 1 },
-    { supplier_id: "S1-B", name: "Global Bulk Components", cost: 280, delivery_days: 10 },
-    { supplier_id: "S1-C", name: "Standard Mid-Range Electronics", cost: 340, delivery_days: 4 },
+    { supplier_id: "S1-A", name: "Texas Instruments India", cost: 450, delivery_days: 1, website: "https://www.ti.com/en-in/product/IWR6843AOPEVM" },
+    { supplier_id: "S1-B", name: "Mouser Electronics India", cost: 280, delivery_days: 10, website: "https://www.mouser.in/c/sensors/radar-sensors/" },
+    { supplier_id: "S1-C", name: "DigiKey Electronics India", cost: 340, delivery_days: 4, website: "https://www.digikey.in/en/products/filter/rf-evaluation-and-development-kits-boards/818" },
   ],
   "BRK-22": [
-    { supplier_id: "S2-A", name: "Rapid Brake & Motion Inc.", cost: 620, delivery_days: 2 },
-    { supplier_id: "S2-B", name: "Industrial Steel Castings LLC", cost: 390, delivery_days: 14 },
-    { supplier_id: "S2-C", name: "Apex Actuators Group", cost: 480, delivery_days: 5 },
+    { supplier_id: "S2-A", name: "Bosch Rexroth India", cost: 620, delivery_days: 2, website: "https://www.boschrexroth.com/en/in/" },
+    { supplier_id: "S2-B", name: "RS Components India", cost: 390, delivery_days: 14, website: "https://in.rsdelivers.com/productlist/search?query=electromagnetic%20brake" },
+    { supplier_id: "S2-C", name: "element14 India", cost: 480, delivery_days: 5, website: "https://in.element14.com/c/automation-process-control/solenoids/magnetic-brakes" },
   ],
   "BAT-99": [
-    { supplier_id: "S3-A", name: "Thermal Core Pro", cost: 380, delivery_days: 1 },
-    { supplier_id: "S3-B", name: "Pacific Lithium & Cell Ltd", cost: 210, delivery_days: 12 },
-    { supplier_id: "S3-C", name: "EuroTherm Components", cost: 290, delivery_days: 4 },
+    { supplier_id: "S3-A", name: "Schneider Electric India", cost: 380, delivery_days: 1, website: "https://www.se.com/in/en/product-category/4700-thermal-management/" },
+    { supplier_id: "S3-B", name: "DigiKey Electronics India", cost: 210, delivery_days: 12, website: "https://www.digikey.in/en/products/filter/thermal-management-accessories/231" },
+    { supplier_id: "S3-C", name: "Mouser Electronics India", cost: 290, delivery_days: 4, website: "https://www.mouser.in/c/embedded-solutions/thermal-management/" },
   ],
   "MTR-44": [
-    { supplier_id: "S4-A", name: "Hyper-Drive Electric Co.", cost: 240, delivery_days: 2 },
-    { supplier_id: "S4-B", name: "Sino-Motor Direct", cost: 130, delivery_days: 9 },
-    { supplier_id: "S4-C", name: "Vanguard Rotary Parts", cost: 175, delivery_days: 4 },
+    { supplier_id: "S4-A", name: "maxon motor India", cost: 240, delivery_days: 2, website: "https://www.maxongroup.co.in/maxon/view/content/contact-service-india" },
+    { supplier_id: "S4-B", name: "RS Components India", cost: 130, delivery_days: 9, website: "https://in.rsdelivers.com/productlist/search?query=brushless%20dc%20motor" },
+    { supplier_id: "S4-C", name: "element14 India", cost: 175, delivery_days: 4, website: "https://in.element14.com/c/motors-motor-controls/motors/dc-brushless-motors" },
   ],
   "GRB-15": [
-    { supplier_id: "S5-A", name: "Express Precision Gears", cost: 190, delivery_days: 1 },
-    { supplier_id: "S5-B", name: "Continental Gear Works", cost: 110, delivery_days: 11 },
-    { supplier_id: "S5-C", name: "Alliance Mechanical Corp.", cost: 145, delivery_days: 5 },
+    { supplier_id: "S5-A", name: "Misumi India", cost: 190, delivery_days: 1, website: "https://in.misumi-ec.com/vona2/mech/m0100000000/m0114000000/" },
+    { supplier_id: "S5-B", name: "RS Components India", cost: 110, delivery_days: 11, website: "https://in.rsdelivers.com/productlist/search?query=planetary%20gearbox" },
+    { supplier_id: "S5-C", name: "element14 India", cost: 145, delivery_days: 5, website: "https://in.element14.com/c/automation-process-control/gearboxes-gearheads/planetary-gearboxes" },
   ],
   "PNL-01": [
-    { supplier_id: "S6-A", name: "Ultra-Fab Composite Express", cost: 95, delivery_days: 2 },
-    { supplier_id: "S6-B", name: "General Sheet Metal Supply", cost: 45, delivery_days: 14 },
-    { supplier_id: "S6-C", name: "Midwest Plastics & Shrouds", cost: 65, delivery_days: 6 },
+    { supplier_id: "S6-A", name: "RS Components India", cost: 95, delivery_days: 2, website: "https://in.rsdelivers.com/productlist/search?query=protective-covers" },
+    { supplier_id: "S6-B", name: "element14 India", cost: 45, delivery_days: 14, website: "https://in.element14.com/c/safety-protection/machine-safety/machine-guards" },
+    { supplier_id: "S6-C", name: "Misumi India", cost: 65, delivery_days: 6, website: "https://in.misumi-ec.com/vona2/mech/m0500000000/" },
   ],
   "BKT-05": [
-    { supplier_id: "S7-A", name: "Titanium Forge Express", cost: 75, delivery_days: 1 },
-    { supplier_id: "S7-B", name: "Bargain Brackets LLC", cost: 25, delivery_days: 15 },
-    { supplier_id: "S7-C", name: "Prime Machining Co.", cost: 45, delivery_days: 5 },
+    { supplier_id: "S7-A", name: "RS Components India", cost: 75, delivery_days: 1, website: "https://in.rsdelivers.com/productlist/search?query=mounting-brackets" },
+    { supplier_id: "S7-B", name: "element14 India", cost: 25, delivery_days: 15, website: "https://in.element14.com/c/hardware/brackets" },
+    { supplier_id: "S7-C", name: "Misumi India", cost: 45, delivery_days: 5, website: "https://in.misumi-ec.com/vona2/detail/110302684810/" },
   ],
   "FST-12": [
-    { supplier_id: "S8-A", name: "Quick-Lock Fastener Express", cost: 18, delivery_days: 1 },
-    { supplier_id: "S8-B", name: "Standard Thread Supply", cost: 6, delivery_days: 12 },
-    { supplier_id: "S8-C", name: "Integra Bolt & Rivet Co.", cost: 10, delivery_days: 4 },
+    { supplier_id: "S8-A", name: "RS Components India", cost: 18, delivery_days: 1, website: "https://in.rsdelivers.com/productlist/search?query=vibration-damping-mount" },
+    { supplier_id: "S8-B", name: "element14 India", cost: 6, delivery_days: 12, website: "https://in.element14.com/c/hardware/vibration-isolators" },
+    { supplier_id: "S8-C", name: "Misumi India", cost: 10, delivery_days: 4, website: "https://in.misumi-ec.com/vona2/mech/m0200000000/m0212000000/" },
   ],
 };
 

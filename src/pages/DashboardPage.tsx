@@ -480,7 +480,7 @@ export default function DashboardPage({
                     MODEL INSTANCE
                   </span>
                   <span className="text-[11px] font-mono font-bold text-slate-800 truncate block">
-                    GEMINI-3.5-FLASH
+                    NITRO-STACK.AI
                   </span>
                 </div>
               </div>

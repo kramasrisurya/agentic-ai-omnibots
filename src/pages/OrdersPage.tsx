@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Briefcase,
   Info,
+  ExternalLink,
 } from "lucide-react";
 import { LedgerEntry, PARTS_CATALOG, SUPPLIERS_DB } from "../types";
 
@@ -57,6 +58,7 @@ export default function OrdersPage({ ledger, onAddLedgerEntry }: OrdersPageProps
       timestamp,
       chosenSupplierId: chosenSupplier.supplier_id,
       chosenSupplierName: chosenSupplier.name,
+      chosenSupplierWebsite: chosenSupplier.website,
       orderCost: chosenSupplier.cost * formQuantity,
       deliveryDays: chosenSupplier.delivery_days,
       tradeOffIgnored: "Manual operator request",
@@ -147,6 +149,7 @@ export default function OrdersPage({ ledger, onAddLedgerEntry }: OrdersPageProps
                   <th className="py-2.5 px-3">Order ID</th>
                   <th className="py-2.5 px-3">Part Type</th>
                   <th className="py-2.5 px-3">Supplier Name</th>
+                  <th className="py-2.5 px-3">Official Website</th>
                   <th className="py-2.5 px-3">Delivery Lead</th>
                   <th className="py-2.5 px-3 text-right">Cost</th>
                   <th className="py-2.5 px-3">Logistics SLA</th>
@@ -173,7 +176,31 @@ export default function OrdersPage({ ledger, onAddLedgerEntry }: OrdersPageProps
                           {order.part_name}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-slate-800">{order.chosenSupplierName}</td>
+                      <td className="py-3 px-3 text-slate-800 font-black">{order.chosenSupplierName}</td>
+                      <td className="py-3 px-3">
+                        {(() => {
+                          const partSuppliers = SUPPLIERS_DB[order.part_id] || [];
+                          const supplierInfo = partSuppliers.find(
+                            (s) => s.supplier_id === order.chosenSupplierId || s.name === order.chosenSupplierName
+                          );
+                          const websiteUrl = order.chosenSupplierWebsite || supplierInfo?.website;
+                          
+                          if (websiteUrl) {
+                            return (
+                              <a
+                                href={websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-300 rounded-lg font-bold transition-all shadow-sm"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5 text-indigo-600" />
+                                <span>View Part &amp; Price</span>
+                              </a>
+                            );
+                          }
+                          return <span className="text-slate-400 text-[10px]">-</span>;
+                        })()}
+                      </td>
                       <td className="py-3 px-3 text-slate-800">
                         <span className="flex items-center gap-1 font-bold text-slate-800">
                           <Clock className="w-3.5 h-3.5 text-cyan-600 animate-pulse" /> {order.deliveryDays} Days
