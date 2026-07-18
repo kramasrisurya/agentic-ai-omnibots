@@ -21,21 +21,32 @@
   <img src="https://img.shields.io/badge/license-MIT-9E9E9E?style=for-the-badge&labelColor=0F172A" alt="license" />
 </p>
 
+<br/>
+
+<a href="https://synth-line-omni-6-omni-bots-amrita-university-amritapuri-campus.app.nitrocloud.ai">
+  <img src="https://img.shields.io/badge/%F0%9F%9A%80%20LAUNCH%20LIVE%20DEMO-6C5CE7?style=for-the-badge&labelColor=0F172A&logo=vercel&logoColor=white" alt="Launch Live Demo" />
+</a>
+
+<br/><br/>
+
 <table>
 <tr><td align="center">
 
-🤖 **Detect** &nbsp;·&nbsp; ⚖️ **Triage** &nbsp;·&nbsp; 💸 **Source** &nbsp;·&nbsp; 🌐 **Audit** &nbsp;·&nbsp; 🚀 **Ship**
+🤖&nbsp;**Detect**&nbsp;&nbsp;→&nbsp;&nbsp;⚖️&nbsp;**Triage**&nbsp;&nbsp;→&nbsp;&nbsp;💸&nbsp;**Source**&nbsp;&nbsp;→&nbsp;&nbsp;🌐&nbsp;**Audit**&nbsp;&nbsp;→&nbsp;&nbsp;🚀&nbsp;**Ship**
 
 </td></tr>
 </table>
 
+<br/>
+
 <p>
-  <a href="#-problem-statement"><b>Problem</b></a> ·
-  <a href="#-proposed-solution"><b>Solution</b></a> ·
-  <a href="#-architecture"><b>Architecture</b></a> ·
-  <a href="#-the-agent-pipeline"><b>Agents</b></a> ·
-  <a href="#-tech-stack"><b>Tech Stack</b></a> ·
-  <a href="https://synth-line-omni-6-omni-bots-amrita-university-amritapuri-campus.app.nitrocloud.ai"><b>🔗 Live Demo</b></a>
+  <a href="#-problem-statement">Problem</a> &nbsp;•&nbsp;
+  <a href="#-proposed-solution">Solution</a> &nbsp;•&nbsp;
+  <a href="#-architecture">Architecture</a> &nbsp;•&nbsp;
+  <a href="#-the-agent-pipeline">Agents</a> &nbsp;•&nbsp;
+  <a href="#-feature-walkthrough">Features</a> &nbsp;•&nbsp;
+  <a href="#-tech-stack">Tech Stack</a> &nbsp;•&nbsp;
+  <a href="#-getting-started">Setup</a>
 </p>
 
 </div>
@@ -46,18 +57,28 @@
 
 ## 📖 Table of Contents
 
-- [Problem Statement](#-problem-statement)
-- [Proposed Solution](#-proposed-solution)
-- [Architecture](#-architecture)
-- [The Agent Pipeline](#-the-agent-pipeline)
-- [Feature Walkthrough](#-feature-walkthrough)
-- [Tech Stack](#-tech-stack)
-- [Screenshots](#-screenshots)
-- [Getting Started](#-getting-started)
-- [Roadmap](#-roadmap)
-- [License](#-license)
+<table>
+<tr>
+<td valign="top" width="50%">
 
----
+- [🧩 Problem Statement](#-problem-statement)
+- [💡 Proposed Solution](#-proposed-solution)
+- [🏗 Architecture](#-architecture)
+- [🤖 The Agent Pipeline](#-the-agent-pipeline)
+- [✨ Feature Walkthrough](#-feature-walkthrough)
+
+</td>
+<td valign="top" width="50%">
+
+- [🛠 Tech Stack](#-tech-stack)
+- [🖼 Screenshots](#-screenshots)
+- [🚀 Getting Started](#-getting-started)
+- [🗺 Roadmap](#-roadmap)
+- [📄 License](#-license)
+
+</td>
+</tr>
+</table>
 
 <div align="center">
 
@@ -93,6 +114,13 @@ Every agent's reasoning (cognitive memory, dispatched MCP interfaces, live logs)
 
 ## 🏗 Architecture
 
+**Flow:** Live optical feed → contour/pixel-scan defect detection → automated reject + criticality lookup → cost-vs-speed sourcing decision → live vendor audit and PO dispatch. All state changes are reflected instantly across **Inspection Workspace → Audit Center → Supplier Intelligence → Orders**.
+
+<details>
+<summary><b>View system architecture diagram</b></summary>
+
+<br/>
+
 ```
                     ┌─────────────────────────────────────┐
                     │        NITROSTACK CLOUD (Hosting)     │
@@ -118,7 +146,7 @@ Every agent's reasoning (cognitive memory, dispatched MCP interfaces, live logs)
      + localization     lookup          decision            auditing
 ```
 
-**Flow:** Live optical feed → contour/pixel-scan defect detection → automated reject + criticality lookup → cost-vs-speed sourcing decision → live vendor audit and PO dispatch. All state changes are reflected instantly across **Inspection Workspace → Audit Center → Supplier Intelligence → Orders**.
+</details>
 
 ---
 
@@ -146,12 +174,14 @@ This is the decision engine that makes the whole system meaningful — not a fla
 
 ## ✨ Feature Walkthrough
 
-- **Live Conveyor Digital Twin** — drag-and-drop parts library, adjustable manual quality-injection profiles (Auto / Good / Avg / Poor), real-time lane speed and vision-sensor overlay
-- **Inspection Workspace** — live optical feed with exposure/aperture/temp telemetry, manual pass/defect override, real-time AI multi-agent review timeline
-- **Audit Center** — non-conformance ledger with cost-impact tracking, per-part diagnostic files, root-cause mechanical analysis, exportable ISO 9001–verified CSV audit reports
-- **Supplier Intelligence Registry** — criticality-tagged parts registry (24 indexed global vendors), live sourcing matrix comparing fastest/cheapest/balanced options per part
-- **AI Operations Center** — select any of the 4 agents to inspect live cognitive memory, dispatched MCP interfaces, and full execution logs
-- **Purchase Orders Tracker** — real-time PO dashboard showing supplier, delivery lead, cost, and fulfillment status, with manual reorder override
+| | Module | What it does |
+|---|---|---|
+| 🏭 | **Live Conveyor Digital Twin** | Drag-and-drop parts library, adjustable manual quality-injection profiles (Auto / Good / Avg / Poor), real-time lane speed and vision-sensor overlay |
+| 🔍 | **Inspection Workspace** | Live optical feed with exposure/aperture/temp telemetry, manual pass/defect override, real-time AI multi-agent review timeline |
+| 📋 | **Audit Center** | Non-conformance ledger with cost-impact tracking, per-part diagnostic files, root-cause mechanical analysis, exportable ISO 9001–verified CSV audit reports |
+| 🌐 | **Supplier Intelligence Registry** | Criticality-tagged parts registry (24 indexed global vendors), live sourcing matrix comparing fastest/cheapest/balanced options per part |
+| 🧠 | **AI Operations Center** | Select any of the 4 agents to inspect live cognitive memory, dispatched MCP interfaces, and full execution logs |
+| 📦 | **Purchase Orders Tracker** | Real-time PO dashboard showing supplier, delivery lead, cost, and fulfillment status, with manual reorder override |
 
 ---
 
@@ -165,10 +195,12 @@ This is the decision engine that makes the whole system meaningful — not a fla
   <img src="https://img.shields.io/badge/Siemens%20SCADA%20V4.2-009999?style=flat-square" />
 </p>
 
-- **Orchestration & Hosting:** Nitrostack (MCP tool registry, API layer, Cloud deployment) — the entire system, agents included, runs as a single deployable Nitrostack instance
-- **Computer Vision:** OpenCV-based contour/pixel-scan defect classification against CAD tolerance references
-- **Simulation Layer:** Siemens SCADA–styled Factory OS shell for the digital twin UI
-- **Agent Framework:** 4 independent MCP tool-calling agents sharing one Nitrostack MCP server
+| Layer | Technology | Role |
+|---|---|---|
+| **Orchestration & Hosting** | Nitrostack (MCP · API · Cloud) | Entire system — agents included — runs as one deployable Nitrostack instance |
+| **Computer Vision** | OpenCV | Contour/pixel-scan defect classification against CAD tolerance references |
+| **Simulation Layer** | Siemens SCADA–styled Factory OS | Digital twin UI shell for the conveyor and inspection views |
+| **Agent Framework** | 4× MCP tool-calling agents | Independent agents sharing one Nitrostack MCP server |
 
 ---
 
@@ -184,7 +216,11 @@ This is the decision engine that makes the whole system meaningful — not a fla
 
 ## 🚀 Getting Started
 
-> This project is deployed and run entirely on **Nitrostack Cloud**. If a local/dev setup exists, fill in the section below — otherwise the live demo link above is the primary entry point.
+This project is deployed and run entirely on **Nitrostack Cloud** — no local install required to try it.
+
+👉 **[Launch the Live Demo](https://synth-line-omni-6-omni-bots-amrita-university-amritapuri-campus.app.nitrocloud.ai)**
+
+If you're setting up a local dev environment against this repo:
 
 ```bash
 # Clone the repository
@@ -198,10 +234,16 @@ cd <repo-name>
 
 ## 🗺 Roadmap
 
+<details>
+<summary><b>View planned improvements</b></summary>
+<br/>
+
 - [ ] Add historical defect-rate analytics dashboard
 - [ ] Expand supplier registry beyond current 24 indexed vendors
 - [ ] Add configurable criticality-tier thresholds per part category
 - [ ] Export full agent decision trails as signed audit PDFs
+
+</details>
 
 ---
 
