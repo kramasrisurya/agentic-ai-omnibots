@@ -193,12 +193,38 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <br/>
 
-Built by **OMNI-BOTS** · 
-  **NITHISH KUMAR**
-  **SRI SURYA**
-  **NITHILAN**
-  **VIKRANTH C**
+<div align="center">
+<br/>
+👥 Team OMNI-BOTS
 
+<table>
+<tr>
+<td align="center">
+Nithish Kumar S
+<br/>
+<a href="https://github.com/nithishkumar-dev-10"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+
+</td>
+<td align="center">
+Sri Surya
+<br/>
+<a href="https://github.com/kramasrisurya"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+
+</td>
+<td align="center">
+Nithilan
+<br/>
+<a href="https://github.com/nithilan-su57"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+
+</td>
+<td align="center">
+Vikranth C
+<br/>
+<a href="https://github.com/harishvikrant07-ops"><img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" /></a>
+
+</td>
+</tr>
+</table>
 <sub>⚙️ Powered end-to-end by Nitrostack — MCP · API · Cloud</sub>
 
 <br/><br/>
