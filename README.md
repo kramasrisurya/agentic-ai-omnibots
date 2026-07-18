@@ -168,61 +168,20 @@ This is the decision engine that makes the whole system meaningful — not a fla
   <img src="https://img.shields.io/badge/Nitrostack%20MCP-6C5CE7?style=flat-square" />
   <img src="https://img.shields.io/badge/Nitrostack%20API-6C5CE7?style=flat-square" />
   <img src="https://img.shields.io/badge/Nitrostack%20Cloud-6C5CE7?style=flat-square" />
-  <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=flat-square&logo=opencv&logoColor=white" />
   <img src="https://img.shields.io/badge/Siemens%20SCADA%20V4.2-009999?style=flat-square" />
 </p>
 
 | Layer | Technology | Role |
 |---|---|---|
 | **Orchestration & Hosting** | Nitrostack (MCP · API · Cloud) | Entire system — agents included — runs as one deployable Nitrostack instance |
-| **Computer Vision** | OpenCV | Contour/pixel-scan defect classification against CAD tolerance references |
 | **Simulation Layer** | Siemens SCADA–styled Factory OS | Digital twin UI shell for the conveyor and inspection views |
 | **Agent Framework** | 4× MCP tool-calling agents | Independent agents sharing one Nitrostack MCP server |
 
 ---
 
-## 🖼 Screenshots
 
-> Add exported screenshots to a `/screenshots` folder in the repo and reference them below.
 
-| Dashboard | Inspection Workspace | Supplier Intelligence |
-|---|---|---|
-| ![Dashboard](./screenshots/dashboard.png) | ![Inspection](./screenshots/inspection.png) | ![Supplier Intel](./screenshots/supplier-intel.png) |
 
----
-
-## 🚀 Getting Started
-
-This project is deployed and run entirely on **Nitrostack Cloud** — no local install required to try it.
-
-👉 **[Launch the Live Demo](https://synth-line-omni-6-omni-bots-amrita-university-amritapuri-campus.app.nitrocloud.ai)**
-
-If you're setting up a local dev environment against this repo:
-
-```bash
-# Clone the repository
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
-
-# TODO: add Nitrostack CLI / local dev commands here if applicable
-```
-
----
-
-## 🗺 Roadmap
-
-<details>
-<summary><b>View planned improvements</b></summary>
-<br/>
-
-- [ ] Add historical defect-rate analytics dashboard
-- [ ] Expand supplier registry beyond current 24 indexed vendors
-- [ ] Add configurable criticality-tier thresholds per part category
-- [ ] Export full agent decision trails as signed audit PDFs
-
-</details>
-
----
 
 ## 📄 License
 
@@ -234,7 +193,11 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <br/>
 
-Built by **Nithish Kumar S** · B.Tech CS, Amrita Vishwa Vidyapeetham
+Built by **OMNI-BOTS** · 
+  **NITHISH KUMAR**
+  **SRI SURYA**
+  **NITHILAN**
+  **VIKRANTH C**
 
 <sub>⚙️ Powered end-to-end by Nitrostack — MCP · API · Cloud</sub>
 
