@@ -38,9 +38,71 @@ import {
   InventoryStats,
 } from "./types";
 
+
+// Web Audio API Synthesizer for high-tech industrial agent alert
+function playAgentAlertChime(isCritical: boolean = false) {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = isCritical ? "sawtooth" : "sine";
+    osc.frequency.setValueAtTime(isCritical ? 320 : 540, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(isCritical ? 640 : 880, ctx.currentTime + 0.22);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.32);
+  } catch (e) {
+    // Audio context not allowed until first interaction
+  }
+}
+
 export default function App() {
   // --- PAGE ROUTING STATE ---
   const [activePage, setActivePage] = useState<string>("dashboard");
+
+  const handleInjectCustomDefect = () => {
+    playAgentAlertChime(true);
+    const criticalParts = PARTS_CATALOG.filter(p => p.criticality === "critical");
+    const targetPart = criticalParts[Math.floor(Math.random() * criticalParts.length)] || PARTS_CATALOG[0];
+    const newId = "INJ-" + Math.floor(100 + Math.random() * 900);
+    const defects = targetPart.defect_types && targetPart.defect_types.length > 0
+      ? targetPart.defect_types
+      : ["Structural Micro-Fracture", "High-Stress Thermal Warp", "Dielectric Breakdown"];
+    const chosenDefect = defects[Math.floor(Math.random() * defects.length)];
+
+    // Add alert to logs immediately
+    setAgentLogs(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(),
+        timestamp: new Date().toLocaleTimeString(),
+        agent: "Triage Agent",
+        message: `CRITICAL OPERATOR ANOMALY INJECTED: Unit ${newId} (${targetPart.name}) flagged for ${chosenDefect}. Initiating emergency procurement protocol.`,
+        type: "warning",
+        partId: targetPart.part_id
+      }
+    ]);
+
+    // Add part to belt right before inspection
+    setActiveParts(prev => [
+      ...prev.slice(-3),
+      {
+        id: newId,
+        part_id: targetPart.part_id,
+        name: targetPart.name,
+        criticality: "critical",
+        progress: 45,
+        status: "inspecting",
+        category: targetPart.category
+      }
+    ]);
+  };
+
 
   // --- CORE SYSTEM STATES ---
   const [isAutoMode, setIsAutoMode] = useState<boolean>(true);

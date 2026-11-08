@@ -25,6 +25,7 @@ interface TopBarProps {
   isSelfChecking: boolean;
   onEmergencyStop: () => void;
   notificationCount: number;
+  onInjectDefect?: () => void;
 }
 
 export default function TopBar({
@@ -35,6 +36,7 @@ export default function TopBar({
   isSelfChecking,
   onEmergencyStop,
   notificationCount,
+  onInjectDefect,
 }: TopBarProps) {
   const [timeStr, setTimeStr] = useState("");
 
@@ -99,6 +101,20 @@ export default function TopBar({
 
       {/* Action Controls (Toggles, Tests, E-Stop) */}
       <div className="flex flex-wrap items-center gap-2.5 shrink-0 justify-end">
+        {/* Operator Defect Injector Button */}
+        {onInjectDefect && (
+          <motion.button
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onInjectDefect}
+            disabled={isSelfChecking}
+            className="px-3 py-1.5 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center gap-1 font-sans text-xs font-bold transition-all shadow-sm cursor-pointer"
+            title="Simulate a critical defect to witness real-time Triage and Procurement agent reactions"
+          >
+            <span>⚡ INJECT ANOMALY</span>
+          </motion.button>
+        )}
+
         {/* Pilot autopilot mode toggle */}
         <div className="flex items-center gap-2 bg-white/60 border border-white/85 px-3.5 py-1.5 rounded-xl shadow-sm">
           <span className={`text-[10px] font-mono tracking-wider font-bold transition-colors ${isAutoMode ? "text-cyan-600" : "text-slate-500"}`}>
